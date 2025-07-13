@@ -52,7 +52,7 @@ export default function SplashScreen() {
                 animationPhase >= 2 ? "translate-x-full" : "-translate-x-full"
               }`}
             />
-            <span className="text-red-600 font-bold text-4xl relative z-10">P</span>
+            <span className="text-red-600 font-bold text-4xl relative z-10">A</span>
           </div>
 
           {/* Floating pins animation */}

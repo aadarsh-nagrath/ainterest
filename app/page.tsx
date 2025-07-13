@@ -139,7 +139,7 @@ export default function AinterestClone() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
+                <span className="text-white font-bold text-sm">A</span>
               </div>
               <span className="font-semibold text-lg hidden sm:block">Ainterest</span>
             </div>
@@ -208,7 +208,7 @@ export default function AinterestClone() {
       </div>
 
       {/* Masonry Grid */}
-      <div className="px-4 max-w-7xl mx-auto">
+      <div className="px-4 w-full">
         <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4">
           {pins.map((pin) => (
             <div key={pin.id} className="break-inside-avoid mb-4 group cursor-pointer">
