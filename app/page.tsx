@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import SplashScreen from "@/components/splash-screen"
+import GoogleLoginButton from "@/components/google-login-button"
+import { useSession } from "next-auth/react"
 
 // Mock data for Ainterest-style pins with realistic aspect ratios
 const generatePins = (startIndex: number, count: number) => {
@@ -82,6 +84,7 @@ const categories = [
 
 export default function AinterestClone() {
   const [showSplash, setShowSplash] = useState(true)
+  const { data: session } = useSession()
   const [pins, setPins] = useState(() => generatePins(0, 30))
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
@@ -160,10 +163,7 @@ export default function AinterestClone() {
             <Button variant="ghost" size="icon" className="rounded-full">
               <MessageCircle className="w-5 h-5" />
             </Button>
-            <Avatar className="w-8 h-8">
-              <AvatarImage src="/placeholder.svg?height=32&width=32" />
-              <AvatarFallback>A</AvatarFallback>
-            </Avatar>
+            <GoogleLoginButton />
             <Button variant="ghost" size="icon" className="rounded-full">
               <ChevronRight className="w-4 h-4" />
             </Button>
