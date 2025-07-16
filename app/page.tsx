@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Image from "next/image"
 import { Search, Bell, MessageCircle, Menu, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -48,6 +48,14 @@ function getImageDimensions(url: string): Promise<{ width: number; height: numbe
   })
 }
 
+// Shuffle array utility
+function shuffleArray<T>(array: T[]): T[] {
+  return array
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
+}
+
 const categories = [
   { name: "tattoo", image: "/placeholder.svg?height=60&width=60" },
   { name: "fiction concept art", image: "/placeholder.svg?height=60&width=60" },
@@ -64,30 +72,78 @@ export default function AinterestClone() {
   const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
 
-  // Fetch images and get their dimensions
-  useEffect(() => {
-    async function fetchImages() {
-      setLoading(true)
-      const res = await fetch("/api/images")
+  // Simple fetch function
+  const fetchImages = useCallback(async (cursor: string | null = null) => {
+    if (loading) return
+    console.log('Fetching images with cursor:', cursor)
+    setLoading(true)
+    
+    try {
+      const url = cursor ? `/api/images?cursor=${cursor}` : "/api/images"
+      const res = await fetch(url)
       const data = await res.json()
-      // For each image, get its dimensions
+      
+      // Get dimensions for new images
       const imagesWithDimensions = await Promise.all(
-        data.map(async (img: any) => {
+        data.images.map(async (img: any) => {
           try {
             const { width, height } = await getImageDimensions(img.url)
             return { ...img, width, height }
           } catch {
-            // If error, skip this image
             return null
           }
         })
       )
-      setImages(imagesWithDimensions.filter(Boolean))
+      
+      const validImages = imagesWithDimensions.filter(Boolean)
+      
+      setImages(prev => {
+        const ids = new Set(prev.map(img => img.id))
+        const newImages = validImages.filter(img => !ids.has(img.id))
+        
+        // Only shuffle if this is the initial load (no cursor)
+        const imagesToAdd = cursor ? newImages : shuffleArray(newImages)
+        const combined = [...prev, ...imagesToAdd]
+        console.log('Total images now:', combined.length)
+        return combined
+      })
+      
+      setNextCursor(data.nextCursor)
+      setHasMore(!!data.nextCursor)
+      console.log('Next cursor:', data.nextCursor)
+    } catch (error) {
+      console.error('Error fetching images:', error)
+    } finally {
       setLoading(false)
     }
+  }, [loading])
+
+  // Initial fetch
+  useEffect(() => {
     fetchImages()
   }, [])
+
+  // Simple scroll listener for infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || !hasMore) return
+      
+      const scrollTop = window.scrollY
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+      
+      // If we're near the bottom (within 500px), fetch more
+      if (scrollTop + windowHeight >= documentHeight - 500) {
+        console.log('Near bottom, fetching more images')
+        fetchImages(nextCursor)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [loading, hasMore, nextCursor, fetchImages])
 
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 2500)
@@ -174,13 +230,17 @@ export default function AinterestClone() {
 
       {/* Masonry Grid */}
       <div className="px-4 w-full">
-        <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4">
-          {images.map((img) => {
+        <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4" style={{ minHeight: '100vh' }}>
+          {images.map((img, index) => {
             if (!img.width || !img.height) return null
             const aspect = img.width / img.height
             const slot = findClosestCardSlot(aspect)
             return (
-              <div key={img.id} className="break-inside-avoid mb-4 group cursor-pointer">
+              <div 
+                key={`${img.id}-${index}`} 
+                className="break-inside-avoid mb-4 group cursor-pointer"
+                style={{ contain: 'layout' }}
+              >
                 <div
                   className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
                   style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
@@ -201,16 +261,18 @@ export default function AinterestClone() {
             )
           })}
         </div>
-
-        {/* Loading Indicator */}
+        
+        {/* Loading indicator */}
         {loading && (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
           </div>
         )}
-
-        {/* End Message */}
-        {!hasMore && <div className="text-center py-8 text-gray-500">You've reached the end!</div>}
+        
+        {/* End message */}
+        {!hasMore && !loading && (
+          <div className="text-center py-8 text-gray-500">You've reached the end!</div>
+        )}
       </div>
     </div>
   )
