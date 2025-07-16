@@ -10,65 +10,41 @@ import SplashScreen from "@/components/splash-screen"
 import GoogleLoginButton from "@/components/google-login-button"
 import { useSession } from "next-auth/react"
 
-// Mock data for Ainterest-style pins with realistic aspect ratios
-const generatePins = (startIndex: number, count: number) => {
-  const categories = ["Fashion", "Food", "Travel", "Art", "Design", "Photography", "Nature", "Architecture"]
+// Predefined card aspect ratios (width/height)
+const CARD_ASPECT_RATIOS = [
+  { width: 1, height: 1 },    // 1:1
+  { width: 3, height: 4 },    // 3:4
+  { width: 4, height: 3 },    // 4:3
+  { width: 16, height: 9 },   // 16:9
+  { width: 9, height: 16 },   // 9:16
+  { width: 2, height: 3 },    // 2:3
+  { width: 3, height: 2 },    // 3:2
+]
 
-  // Realistic Ainterest-style image dimensions with different aspect ratios
-  const imageDimensions = [
-    { width: 300, height: 400 }, // Portrait (3:4)
-    { width: 300, height: 500 }, // Tall portrait
-    { width: 300, height: 200 }, // Landscape (3:2)
-    { width: 300, height: 300 }, // Square (1:1)
-    { width: 300, height: 600 }, // Very tall portrait
-    { width: 300, height: 180 }, // Wide landscape (16:9)
-    { width: 300, height: 450 }, // Standard portrait
-    { width: 300, height: 350 }, // Medium portrait
-    { width: 300, height: 250 }, // Medium landscape
-    { width: 300, height: 800 }, // Extra tall (like infographics)
-    { width: 300, height: 150 }, // Very wide (panoramic)
-    { width: 300, height: 375 }, // Phone screenshot ratio
-  ]
-
-  const titles = [
-    "Minimalist Home Decor Ideas",
-    "Delicious Pasta Recipe",
-    "Mountain Hiking Adventure",
-    "Abstract Digital Art",
-    "Cozy Reading Nook",
-    "Sunset Photography Tips",
-    "Garden Design Inspiration",
-    "Modern Architecture",
-    "Fashion Street Style",
-    "Healthy Breakfast Bowl",
-    "Travel Photography",
-    "Interior Design Trends",
-    "Landscape Photography",
-    "Art Studio Setup",
-    "Vintage Fashion",
-    "Food Styling Tips",
-    "Nature Photography",
-    "Home Office Design",
-    "Portrait Photography",
-    "Urban Architecture",
-  ]
-
-  return Array.from({ length: count }, (_, i) => {
-    const dimensions = imageDimensions[Math.floor(Math.random() * imageDimensions.length)]
-    const title = titles[Math.floor(Math.random() * titles.length)]
-    const category = categories[Math.floor(Math.random() * categories.length)]
-
-    return {
-      id: startIndex + i,
-      title: `${title} ${startIndex + i + 1}`,
-      description: `Beautiful ${category.toLowerCase()} inspiration for your next project`,
-      image: `/placeholder.svg?height=${dimensions.height}&width=${dimensions.width}`,
-      width: dimensions.width,
-      height: dimensions.height,
-      category: category,
-      saves: Math.floor(Math.random() * 1000) + 10,
-      aspectRatio: dimensions.height / dimensions.width,
+// Helper to find the closest card slot for an image
+function findClosestCardSlot(imageAspect: number) {
+  let minDiff = Infinity
+  let bestSlot = CARD_ASPECT_RATIOS[0]
+  for (const slot of CARD_ASPECT_RATIOS) {
+    const slotAspect = slot.width / slot.height
+    const diff = Math.abs(slotAspect - imageAspect)
+    if (diff < minDiff) {
+      minDiff = diff
+      bestSlot = slot
     }
+  }
+  return bestSlot
+}
+
+// Utility to get image dimensions
+function getImageDimensions(url: string): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image()
+    img.onload = function () {
+      resolve({ width: img.naturalWidth, height: img.naturalHeight })
+    }
+    img.onerror = reject
+    img.src = url
   })
 }
 
@@ -85,51 +61,40 @@ const categories = [
 export default function AinterestClone() {
   const [showSplash, setShowSplash] = useState(true)
   const { data: session } = useSession()
-  const [pins, setPins] = useState(() => generatePins(0, 30))
+  const [images, setImages] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
 
-  const loadMorePins = useCallback(() => {
-    if (loading || !hasMore) return
-
-    setLoading(true)
-
-    // Simulate API call delay
-    setTimeout(() => {
-      const newPins = generatePins(pins.length, 20)
-      setPins((prev) => [...prev, ...newPins])
-      setLoading(false)
-
-      // Stop loading more after 200 pins for demo
-      if (pins.length >= 200) {
-        setHasMore(false)
-      }
-    }, 1000)
-  }, [pins.length, loading, hasMore])
-
-  // Hide splash screen after 2.5 seconds
+  // Fetch images and get their dimensions
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false)
-    }, 2500)
-
-    return () => clearTimeout(timer)
+    async function fetchImages() {
+      setLoading(true)
+      const res = await fetch("/api/images")
+      const data = await res.json()
+      // For each image, get its dimensions
+      const imagesWithDimensions = await Promise.all(
+        data.map(async (img: any) => {
+          try {
+            const { width, height } = await getImageDimensions(img.url)
+            return { ...img, width, height }
+          } catch {
+            // If error, skip this image
+            return null
+          }
+        })
+      )
+      setImages(imagesWithDimensions.filter(Boolean))
+      setLoading(false)
+    }
+    fetchImages()
   }, [])
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 1000) {
-        loadMorePins()
-      }
-    }
+    const timer = setTimeout(() => setShowSplash(false), 2500)
+    return () => clearTimeout(timer)
+  }, [])
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [loadMorePins])
-
-  if (showSplash) {
-    return <SplashScreen />
-  }
+  if (showSplash) return <SplashScreen />
 
   return (
     <div className="min-h-screen bg-white">
@@ -210,62 +175,31 @@ export default function AinterestClone() {
       {/* Masonry Grid */}
       <div className="px-4 w-full">
         <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4">
-          {pins.map((pin) => (
-            <div key={pin.id} className="break-inside-avoid mb-4 group cursor-pointer">
-              <div className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg">
-                <Image
-                  src={pin.image || "/placeholder.svg"}
-                  alt={pin.title}
-                  width={pin.width}
-                  height={pin.height}
-                  className="w-full h-auto object-cover"
-                  style={{ aspectRatio: `${pin.width}/${pin.height}` }}
-                />
-
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-end p-4 opacity-0 group-hover:opacity-100">
-                  <div className="w-full flex justify-between items-end">
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 hover:bg-white text-black rounded-full text-xs px-3"
-                      >
-                        Share
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 hover:bg-white text-black rounded-full text-xs px-3"
-                      >
-                        More
-                      </Button>
-                    </div>
-                    <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white rounded-full px-4">
-                      Save
-                    </Button>
-                  </div>
+          {images.map((img) => {
+            if (!img.width || !img.height) return null
+            const aspect = img.width / img.height
+            const slot = findClosestCardSlot(aspect)
+            return (
+              <div key={img.id} className="break-inside-avoid mb-4 group cursor-pointer">
+                <div
+                  className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
+                  style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
+                >
+                  <Image
+                    src={img.url}
+                    alt={img.title}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
                 </div>
-
-                {/* Pin Info */}
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="bg-white/90 hover:bg-white text-black rounded-full text-xs px-2"
-                  >
-                    {pin.saves}
-                  </Button>
+                <div className="pt-3 px-1">
+                  <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-tight">{img.title}</h3>
+                  <p className="text-xs text-gray-600 mt-1 line-clamp-1">{img.description}</p>
                 </div>
               </div>
-
-              {/* Pin Details */}
-              <div className="pt-3 px-1">
-                <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-tight">{pin.title}</h3>
-                <p className="text-xs text-gray-600 mt-1 line-clamp-1">{pin.description}</p>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Loading Indicator */}

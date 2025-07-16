@@ -23,6 +23,7 @@ model User {
   // Relations
   accounts      Account[]
   sessions      Session[]
+  images        Image[]
 
   @@map("users")
 }
@@ -64,4 +65,17 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Image {
+  id          String   @id @default(cuid())
+  uuid        String   @unique
+  name        String
+  url         String
+  createdAt   DateTime @default(now())
+  likes       Int      @default(0)
+  description String?
+  tags        String[]
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
 }
