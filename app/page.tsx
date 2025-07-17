@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import SplashScreen from "@/components/splash-screen"
 import GoogleLoginButton from "@/components/google-login-button"
 import { useSession } from "next-auth/react"
+import Head from 'next/head'
 
 // Predefined card aspect ratios (width/height)
 const CARD_ASPECT_RATIOS = [
@@ -153,127 +154,139 @@ export default function AinterestClone() {
   if (showSplash) return <SplashScreen />
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
+    <>
+      <Head>
+        <title>AI Interest - Discover AI Generated Art & Images</title>
+        <meta name="description" content="Explore a gallery of AI-generated images and art. Discover, save, and share your favorite AI creations on AI Interest." />
+        <meta property="og:title" content="AI Interest - Discover AI Generated Art & Images" />
+        <meta property="og:description" content="Explore a gallery of AI-generated images and art. Discover, save, and share your favorite AI creations on AI Interest." />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="AI Interest" />
+        <meta property="og:url" content="https://your-domain.com/" />
+        {/* Add more Open Graph tags as needed */}
+      </Head>
+      <div className="min-h-screen bg-white">
+        {/* Header */}
+        <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">A</span>
+                </div>
+                <span className="font-semibold text-lg hidden sm:block">Ainterest</span>
+              </div>
+              <Button variant="ghost" className="hidden md:flex items-center gap-1">
+                <Menu className="w-4 h-4" />
+                Home feed
+              </Button>
+            </div>
+
+            <div className="flex-1 max-w-2xl mx-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input placeholder="Search for ideas" className="pl-10 bg-gray-100 border-0 rounded-full" />
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <span className="font-semibold text-lg hidden sm:block">Ainterest</span>
-            </div>
-            <Button variant="ghost" className="hidden md:flex items-center gap-1">
-              <Menu className="w-4 h-4" />
-              Home feed
-            </Button>
-          </div>
-
-          <div className="flex-1 max-w-2xl mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search for ideas" className="pl-10 bg-gray-100 border-0 rounded-full" />
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Bell className="w-5 h-5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <MessageCircle className="w-5 h-5" />
+              </Button>
+              <GoogleLoginButton />
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <ChevronRight className="w-4 h-4" />
+              </Button>
             </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Bell className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <MessageCircle className="w-5 h-5" />
-            </Button>
-            <GoogleLoginButton />
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+        {/* Navigation Tabs */}
+        <div className="flex justify-center py-4 border-b border-gray-100">
+          <div className="flex gap-8">
+            <button className="text-black font-medium border-b-2 border-black pb-2">For you</button>
+            <button className="text-gray-600 hover:text-black pb-2">Explore</button>
           </div>
         </div>
-      </header>
 
-      {/* Navigation Tabs */}
-      <div className="flex justify-center py-4 border-b border-gray-100">
-        <div className="flex gap-8">
-          <button className="text-black font-medium border-b-2 border-black pb-2">For you</button>
-          <button className="text-gray-600 hover:text-black pb-2">Explore</button>
-        </div>
-      </div>
-
-      {/* Category Chips */}
-      <div className="px-4 py-6 max-w-7xl mx-auto">
-        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-          {categories.map((category, index) => (
-            <div
-              key={index}
-              className="flex-shrink-0 bg-gray-100 rounded-2xl p-4 min-w-[200px] cursor-pointer hover:bg-gray-200 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300">
-                  <Image
-                    src={category.image || "/placeholder.svg"}
-                    alt={category.name}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">More ideas for</p>
-                  <p className="font-semibold text-black">{category.name}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Masonry Grid */}
-      <div className="px-4 w-full">
-        <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4" style={{ minHeight: '100vh' }}>
-          {images.map((img, index) => {
-            if (!img.width || !img.height) return null
-            const aspect = img.width / img.height
-            const slot = findClosestCardSlot(aspect)
-            return (
-              <div 
-                key={`${img.id}-${index}`} 
-                className="break-inside-avoid mb-4 group cursor-pointer"
-                style={{ contain: 'layout' }}
+        {/* Category Chips */}
+        <div className="px-4 py-6 max-w-7xl mx-auto">
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {categories.map((category, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 bg-gray-100 rounded-2xl p-4 min-w-[200px] cursor-pointer hover:bg-gray-200 transition-colors"
               >
-                <div
-                  className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
-                  style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
-                >
-                  <Image
-                    src={img.url}
-                    alt={img.title}
-                    fill
-                    style={{ objectFit: "cover" }}
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                  />
-                </div>
-                <div className="pt-3 px-1">
-                  <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-tight">{img.title}</h3>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-1">{img.description}</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300">
+                    <Image
+                      src={category.image || "/placeholder.svg"}
+                      alt={category.name}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">More ideas for</p>
+                    <p className="font-semibold text-black">{category.name}</p>
+                  </div>
                 </div>
               </div>
-            )
-          })}
-        </div>
-        
-        {/* Loading indicator */}
-        {loading && (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            ))}
           </div>
-        )}
-        
-        {/* End message */}
-        {!hasMore && !loading && (
-          <div className="text-center py-8 text-gray-500">You've reached the end!</div>
-        )}
+        </div>
+
+        {/* Masonry Grid */}
+        <div className="px-4 w-full">
+          <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-7 gap-4" style={{ minHeight: '100vh' }}>
+            {images.map((img, index) => {
+              if (!img.width || !img.height) return null
+              const aspect = img.width / img.height
+              const slot = findClosestCardSlot(aspect)
+              return (
+                <div 
+                  key={`${img.id}-${index}`} 
+                  className="break-inside-avoid mb-4 group cursor-pointer"
+                  style={{ contain: 'layout' }}
+                >
+                  <div
+                    className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
+                    style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
+                  >
+                    <Image
+                      src={img.url}
+                      alt={img.title}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div className="pt-3 px-1">
+                    <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-tight">{img.title}</h3>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-1">{img.description}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          
+          {/* Loading indicator */}
+          {loading && (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            </div>
+          )}
+          
+          {/* End message */}
+          {!hasMore && !loading && (
+            <div className="text-center py-8 text-gray-500">You've reached the end!</div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

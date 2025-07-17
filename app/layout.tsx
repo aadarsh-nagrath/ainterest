@@ -3,10 +3,23 @@ import './globals.css'
 import AuthProvider from '@/components/providers/session-provider'
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.dev',
-}
+  title: 'AI Interest - Discover AI Generated Art & Images',
+  description: 'Explore a gallery of AI-generated images and art. Discover, save, and share your favorite AI creations on AI Interest.',
+  generator: 'AI Interest',
+  openGraph: {
+    title: 'AI Interest - Discover AI Generated Art & Images',
+    description: 'Explore a gallery of AI-generated images and art. Discover, save, and share your favorite AI creations on AI Interest.',
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://your-domain.com/', // Replace with your actual domain
+    siteName: 'AI Interest',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Interest - Discover AI Generated Art & Images',
+    description: 'Explore a gallery of AI-generated images and art. Discover, save, and share your favorite AI creations on AI Interest.',
+  },
+};
 
 export default function RootLayout({
   children,
