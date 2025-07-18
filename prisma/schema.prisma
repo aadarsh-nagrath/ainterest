@@ -71,7 +71,7 @@ model Image {
   id          String   @id @default(cuid())
   uuid        String   @unique
   name        String
-  url         String
+  url         String   @unique
   createdAt   DateTime @default(now())
   likes       Int      @default(0)
   description String?

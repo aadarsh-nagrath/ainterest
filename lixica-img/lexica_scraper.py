@@ -71,11 +71,11 @@ def insert_image_to_db(url, description, idx):
     if not cur:
         return
     try:
-        # Compose the insert statement, using url as uuid and ON CONFLICT DO NOTHING
+        # Compose the insert statement, using url as unique and ON CONFLICT DO NOTHING
         cur.execute(
             '''INSERT INTO "Image" (id, uuid, name, url, description, tags, "userId")
                VALUES (gen_random_uuid(), %s, %s, %s, %s, %s, NULL)
-               ON CONFLICT (uuid) DO NOTHING''',
+               ON CONFLICT (url) DO NOTHING''',
             (url, f'Image {idx}', url, description, ['art', 'ai', 'lexi'])
         )
         print(f"Inserted into DB: {url}")

@@ -9,7 +9,7 @@ import threading
 
 # Set up Chrome options (optional: run headless)
 options = webdriver.ChromeOptions()
-options.add_argument('--headless')
+#options.add_argument('--headless')
 options.add_argument('--window-size=1920,1080')
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
@@ -29,7 +29,7 @@ def extract_images_continuously(driver, image_urls_set, search_event, new_search
         for img in images:
             try:
                 src = img.get_attribute('src')
-                if src and src not in image_urls_set:
+                if src and src not in image_urls_set and '/video/thumbnail' not in src and '/videos/thumbnails' not in src:
                     image_urls_set.add(src)
                     print(src)
             except StaleElementReferenceException:
@@ -121,7 +121,10 @@ try:
         # If we get here, a new search was requested
         search_input = wait.until(EC.presence_of_element_located((By.NAME, "searchBoxInput")))
         search_input.click()
-        search_input.clear()
+        # Robustly clear the search bar (works for React-controlled inputs)
+        search_input.send_keys(Keys.COMMAND, 'a')  # Use COMMAND for Mac, CONTROL for Windows/Linux
+        search_input.send_keys(Keys.BACKSPACE)
+        search_input.clear()  # Extra clear for safety
         search_input.send_keys(new_search_term[0])
         search_input.send_keys(Keys.ENTER)
         time.sleep(5)
