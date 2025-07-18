@@ -153,16 +153,16 @@ export default function AinterestClone() {
   if (showSplash) return <SplashScreen />
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-4 py-3">
+      <header className="sticky top-0 z-50 bg-background border-b border-border px-4 py-3">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">A</span>
+              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">A</span>
               </div>
-              <span className="font-semibold text-lg hidden sm:block">Ainterest</span>
+              <span className="font-semibold text-lg hidden sm:block text-foreground">Ainterest</span>
             </div>
             <Button variant="ghost" className="hidden md:flex items-center gap-1">
               <Menu className="w-4 h-4" />
@@ -172,8 +172,8 @@ export default function AinterestClone() {
 
           <div className="flex-1 max-w-2xl mx-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search for ideas" className="pl-10 bg-gray-100 border-0 rounded-full" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input placeholder="Search for ideas" className="pl-10 bg-muted border-0 rounded-full" />
             </div>
           </div>
 
@@ -193,10 +193,10 @@ export default function AinterestClone() {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="flex justify-center py-4 border-b border-gray-100">
+      <div className="flex justify-center py-4 border-b border-border">
         <div className="flex gap-8">
-          <button className="text-black font-medium border-b-2 border-black pb-2">For you</button>
-          <button className="text-gray-600 hover:text-black pb-2">Explore</button>
+          <button className="text-foreground font-medium border-b-2 border-foreground pb-2">For you</button>
+          <button className="text-muted-foreground hover:text-foreground pb-2">Explore</button>
         </div>
       </div>
 
@@ -206,10 +206,10 @@ export default function AinterestClone() {
           {categories.map((category, index) => (
             <div
               key={index}
-              className="flex-shrink-0 bg-gray-100 rounded-2xl p-4 min-w-[200px] cursor-pointer hover:bg-gray-200 transition-colors"
+              className="flex-shrink-0 bg-muted rounded-2xl p-4 min-w-[200px] cursor-pointer hover:bg-accent transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-muted">
                   <Image
                     src={category.image || "/placeholder.svg"}
                     alt={category.name}
@@ -219,8 +219,8 @@ export default function AinterestClone() {
                   />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">More ideas for</p>
-                  <p className="font-semibold text-black">{category.name}</p>
+                  <p className="text-sm text-muted-foreground">More ideas for</p>
+                  <p className="font-semibold text-foreground">{category.name}</p>
                 </div>
               </div>
             </div>
@@ -242,7 +242,7 @@ export default function AinterestClone() {
                 style={{ contain: 'layout' }}
               >
                 <div
-                  className="relative rounded-2xl overflow-hidden bg-gray-100 hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
+                  className="relative rounded-2xl overflow-hidden bg-muted hover:brightness-95 transition-all duration-200 shadow-sm hover:shadow-lg"
                   style={{ aspectRatio: `${slot.width} / ${slot.height}` }}
                 >
                   <Image
@@ -254,8 +254,8 @@ export default function AinterestClone() {
                   />
                 </div>
                 <div className="pt-3 px-1">
-                  <h3 className="font-medium text-sm text-gray-900 line-clamp-2 leading-tight">{img.title}</h3>
-                  <p className="text-xs text-gray-600 mt-1 line-clamp-1">{img.description}</p>
+                  <h3 className="font-medium text-sm text-foreground line-clamp-2 leading-tight">{img.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{img.description}</p>
                 </div>
               </div>
             )
@@ -265,13 +265,13 @@ export default function AinterestClone() {
         {/* Loading indicator */}
         {loading && (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         )}
         
         {/* End message */}
         {!hasMore && !loading && (
-          <div className="text-center py-8 text-gray-500">You've reached the end!</div>
+          <div className="text-center py-8 text-muted-foreground">You've reached the end!</div>
         )}
       </div>
     </div>

@@ -4,6 +4,18 @@ import { signIn, signOut, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogIn, LogOut, User } from "lucide-react"
+import { useTheme } from "next-themes"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
+} from "@/components/ui/dropdown-menu"
+import { Check, Sun, Moon, Laptop } from "lucide-react"
 
 export default function GoogleLoginButton() {
   const { data: session, status } = useSession()
@@ -22,24 +34,36 @@ export default function GoogleLoginButton() {
   }
 
   if (session) {
+    const { theme, setTheme } = useTheme();
     return (
-      <div className="flex items-center gap-2">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
-          <AvatarFallback>
-            {session.user?.name?.[0] || <User className="w-4 h-4" />}
-          </AvatarFallback>
-        </Avatar>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => signOut()}
-          className="hidden sm:flex items-center gap-1"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign out
-        </Button>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Avatar className="w-8 h-8 cursor-pointer">
+            <AvatarImage src={session.user?.image || ""} alt={session.user?.name || "User"} />
+            <AvatarFallback>
+              {session.user?.name?.[0] || <User className="w-4 h-4" />}
+            </AvatarFallback>
+          </Avatar>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Theme</DropdownMenuLabel>
+          <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+            <DropdownMenuRadioItem value="light">
+              <Sun className="w-4 h-4 mr-2" /> Light
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="dark">
+              <Moon className="w-4 h-4 mr-2" /> Dark
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem value="system">
+              <Laptop className="w-4 h-4 mr-2" /> System
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => signOut()}>
+            <LogOut className="w-4 h-4 mr-2" /> Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   }
 
